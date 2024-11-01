@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section - Grading Automation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+
+<body>
+   
+    <script>
+    
+        // Initialize the section and load the initial data
+
+    function initializeSection()
+        {
+            console.log('Initializing section:', sectionID);
+            document.getElementById("sectionTitle").innerText = "Section Grading Automation";
+            loadRosterData();  // Load roster data when the page loads.
+        }
+
+
+    document.addEventListener('DOMContentLoaded', initializeSection);
+
+
+    </script>
+
+    <div class="layout">
+        <!-- Sidebar with navigation buttons -->
+        <div class="sidebar">
+            <h2 id="sectionTitle">Section Grading Automation</h2>
+           
+            <button onclick="showSection('rosterView')">Students Roster</button>
+            <button onclick="showSection('assignmentUpload')">Upload Assignment</button>
+            <button id="processButton" onclick="showSection('processData')">Process Data</button>
+        </div>
+
+        <!-- Main content area for each section's content -->
+        <div class="main-content">
+            
+            <div id="rosterView" class="content-section" style="display: none;">
+                <h2>Students Roster</h2>
+                <div id="rosterContent">Loading Roster Data...</div>
+            </div>
+            <div id="assignmentUpload" class="content-section" style="display: none;">
+                <h2>Upload Special Assignment</h2>
+                <input type="file" id="assignmentFile" accept=".csv, .xlsx">
+                <button onclick="uploadAssignmentGrade()">Upload</button>
+                <div id="assignmentGradeContent"></div>
+            </div>
+
+
+            <div id="processData" class="content-section" style="display: none;">
+            
+                <div id="joinedDataContent"></div> 
+
+            </div>
+
+            
+
+        </div>
+    </div>
+
+    <!-- Libraries and JavaScript Files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="section.js"></script>
+</body>
+</html>
