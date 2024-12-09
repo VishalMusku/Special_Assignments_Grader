@@ -138,7 +138,7 @@ function uploadAssignmentGrade() {
             'First Name': student['First Name'],
             'Last Name': student['Last Name'],
             'Email': student['Email'],
-            'Grade': student['Grade']
+            'Grade': normalizeGrade(student['Grade'])
         }));
 
         // Create a table to display the filtered data
@@ -178,6 +178,58 @@ function uploadAssignmentGrade() {
     reader.readAsArrayBuffer(file); // Read the file as an ArrayBuffer
    
 }
+
+
+function normalizeGrade(grade) {
+    if (!isNaN(grade)) {
+        const numericGrade = parseFloat(grade);
+        if (numericGrade >= 0 && numericGrade <= 1) {
+            return numericGrade * 100; // Convert to percentage
+        }
+        return numericGrade; // Return as-is if not between 0 and 1
+    }
+    return grade; // Return as-is if not a number
+}
+
+
+
+function copyGradeColumn() {
+    // Select all the grade cells by class 'grade-column'
+    const gradeCells = document.querySelectorAll('.grade-column');
+    
+    // Extract the grade text and handle both percentages and numeric values
+    const grades = Array.from(gradeCells).map(cell => {
+        const gradeText = cell.innerText.trim();
+
+        // If the grade contains a %, return it as is
+        if (gradeText.includes('%')) {
+            return gradeText;
+        }
+
+        // If the grade is a number, multiply by 100 (assuming it's a decimal number)
+        const numericGrade = parseFloat(gradeText);
+        if (!isNaN(numericGrade)) {
+            return numericGrade * 100; // Convert to percentage
+        }
+
+        return ''; // In case of invalid data
+    });
+
+    // Join the grades into a single string, separated by new lines
+    const gradesText = grades.join('\n');
+    
+    // Create a temporary textarea to copy the text to the clipboard
+    const textarea = document.createElement('textarea');
+    textarea.value = gradesText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    // Alert to notify user
+    alert('Grades copied to clipboard!');
+}
+         
 
 
 
@@ -222,7 +274,7 @@ function processAndDisplayData() {
                 firstName: student.firstName || 'Unknown',
                 lastName: student.lastName || 'Unknown',
                 email: student['Email Address'],
-                grade: gradeEntry.Grade ? (parseFloat(gradeEntry.Grade) * 10).toFixed(2) : '0'
+                grade: gradeEntry.Grade ? (parseFloat(gradeEntry.Grade)).toFixed(2) : '0'
             };
         }
         return null;
@@ -271,73 +323,6 @@ function displayProcessedData(data) {
 
 
 
-// document.getElementById('processButton').addEventListener('click', processData);
-
-// function processData() {
-//     // Check if both relevantStudents and filteredData are populated
-//     if (relevantStudents.length === 0 || filteredData.length === 0) {
-//         alert('Please load both the roster data and the assignment grades before processing.');
-//         return;
-//     }
-
-//     // Perform the join
-//     const joinedData = relevantStudents.map(student => {
-//         const gradeData = filteredData.find(gradeStudent => 
-//             gradeStudent['Email'].toLowerCase() === student['Email Address'].toLowerCase()
-//         );
-
-
-//         const gradeValue = gradeData && gradeData['Grade'] && gradeData['Grade'] !== 'n/a'
-//     ? (gradeData['Grade'] * 10).toFixed(1) : 0;
-
-
-//     return {
-//         ...student, // Include all properties from relevantStudents
-//         Grade: gradeValue // Add the processed grade
-//     };
-
-
-
-//     });
-
-//     // Display the joined data
-//     displayJoinedData(joinedData);
-// }
-
-
-// function displayJoinedData(joinedData) {
-//     let tableHTML = `
-//         <h3>Final Results</h3>
-//         <table class="joined-data-table">
-//             <thead>
-//                 <tr>
-//                     <th>S.No</th>
-//                     <th>First Name</th>
-//                     <th>Last Name</th>
-//                     <th>Sooner ID</th>
-//                     <th>Email Address</th>
-//                     <th>Grade</th>
-//                 </tr>
-//             </thead>
-//             <tbody>
-//                 ${joinedData.map((student, index) => `
-//                     <tr>
-//                         <td>${index + 1}</td>
-//                         <td>${student['First Name']}</td>
-//                         <td>${student['Last Name']}</td>
-//                         <td>${student['Sooner ID']}</td>
-//                         <td>${student['Email Address']}</td>
-//                         <td>${student['Grade']}</td>
-//                     </tr>
-//                 `).join('')}
-//             </tbody>
-//         </table>
-//     `;
-
-//     document.getElementById('joinedDataContent').innerHTML = tableHTML; 
-// }
-
-
 
 document.getElementById('processButton').addEventListener('click', processData);
 
@@ -355,7 +340,7 @@ document.getElementById('processButton').addEventListener('click', processData);
                 );
 
                 const gradeValue = gradeData && gradeData['Grade'] && gradeData['Grade'] !== 'n/a'
-                    ? (gradeData['Grade'] * 10).toFixed(1) : 0;
+                    ? (gradeData['Grade']/10).toFixed(1) : 0;
 
                 return {
                     ...student, // Include all properties from relevantStudents
@@ -380,6 +365,9 @@ document.getElementById('processButton').addEventListener('click', processData);
                             <th>Email Address <button class="toggle-btn" onclick="toggleColumn(4)">▼</button></th>
                             <th>Grade <button class="toggle-btn" onclick="toggleColumn(5)">▼</button></th>
                         </tr>
+
+                        <button id="copyButton" onclick="copyGradeColumn()">Copy Grades</button>
+
                     </thead>
                     <tbody>
                         ${joinedData.map((student, index) => `
